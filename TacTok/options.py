@@ -20,7 +20,8 @@ def parse_args():
     # experimental setup
     parser.add_argument('--include_synthetic', action='store_true')
     parser.add_argument('--exp_id', type=str)
-    parser.add_argument('--datapath', type=str, default='processed/proof_steps')
+    # parser.add_argument('--datapath', type=str, default='proof_steps/human')
+    parser.add_argument('--datapath', type=str, default='postprocessed/processed/proof_steps')
     parser.add_argument('--projs_split', type=str, default='../projs_split.json')
     parser.add_argument('--num_epochs', type=int, default=4)
     parser.add_argument('--resume', type=str, help='the model checkpoint to resume')
@@ -36,6 +37,14 @@ def parse_args():
     parser.add_argument('--num_tactics', type=int, default=15025)
     parser.add_argument('--tac_vocab_file', type=str, default='token_vocab.pickle')
     parser.add_argument('--cutoff_len', type=int, default=30)
+    parser.add_argument('--tac_embedding', type=int, default=256)
+    parser.add_argument('--tac_layers', type=int, default=1)
+
+    parser.add_argument('--num_gal', type=int, default=29467)
+    parser.add_argument('--gal_vocab_file', type=str, default='gal_vocab.pickle')
+    parser.add_argument('--gal_cutoff_len', type=int, default=30)
+    parser.add_argument('--gal_embedding', type=int, default=256)
+    parser.add_argument('--gal_layers', type=int, default=1)
 
     # tactic decoder
     parser.add_argument('--size_limit', type=int, default=50)

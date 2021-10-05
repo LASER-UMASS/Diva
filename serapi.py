@@ -136,19 +136,19 @@ class SerAPI:
                 try:
                    msg = parsed_item[1][3][1]
                    if isinstance(msg, list) and msg != [] and msg[0] == Symbol('Message'):
-                       msg_sexp, _ = self.send('(Print ((pp_format PpStr)) (CoqPp %s))' % sexpdata.dumps(msg[3]))
+                       msg_sexp, _, _ = self.send('(Print ((pp_format PpStr)) (CoqPp %s))' % sexpdata.dumps(msg[3]))
                        msg_str.extend([symbol2str(x[1]) for x in msg_sexp[1][2][1]])
                 except IndexError:
                     pass
                 continue
             responses.append(parsed_item)
         msg_str = '\n'.join(msg_str)
-        return responses, raw_responses
+        return responses, raw_responses, msg_str
 
 
     def send_add(self, cmd, return_ast):
         'Send a (Add () "XXX") command to SerAPI, return the state id and optionally the AST'
-        responses, raw_responses = self.send('(Add () "%s")' % escape(cmd))
+        responses, raw_responses, msg_str = self.send('(Add () "%s")' % escape(cmd))
         state_ids = [int(sid) for sid in ADDED_STATE_PATTERN.findall(raw_responses)]
         state_id = state_ids[-1]
         if self.states_stack != []:
@@ -159,28 +159,37 @@ class SerAPI:
             ast = self.ast_cache[cmd]
         else:
             ast = None
-        return state_id, ast
+        return state_id, ast, msg_str
 
 
     def query_ast(self, cmd):
         'Query the AST of the vernac command just added'
-        responses, _ = self.send('(Parse () "%s")' % escape(cmd))
+        responses, _, _ = self.send('(Parse () "%s")' % escape(cmd))
         ast = responses[1][2][1][0]
         assert ast[0] == Symbol('CoqAst')
         return ast
 
+    def query_proof(self):
+        responses, _, _ = self.send('(Query () Proof)')
+        print("RESPONSES")
+        print(responses)
+        proof = responses[1][2][1]
+        print("PROOF OBJECT before dump")
+        print(proof)
+        return proof
+
 
     def query_library(self, lib):
-        responses, _ = self.send('(Query () (LocateLibrary "%s"))' % lib)
+        responses, _, _ = self.send('(Query () (LocateLibrary "%s"))' % lib)
         physical_path = symbol2str(responses[1][2][1][0][3])
         return physical_path
 
 
     def query_qualid(self, qualid):
-        responses, _ = self.send('(Query () (Locate "%s"))' % qualid)
+        responses, _, _ = self.send('(Query () (Locate "%s"))' % qualid)
         if responses[1][2][1] == [] and qualid.startswith('SerTop.'):
             qualid = qualid[len('SerTop.'):]
-            responses, _ = self.send('(Query () (Locate "%s"))' % qualid)
+            responses, _, _ = self.send('(Query () (Locate "%s"))' % qualid)
         assert len(responses[1][2][1]) == 1
         short_responses = responses[1][2][1][0][1][0][1]
         assert short_responses[1][0] == Symbol('DirPath')
@@ -190,7 +199,7 @@ class SerAPI:
 
     def query_env(self, current_file):
         'Query the global environment'
-        responses, _ = self.send('(Query () Env)')
+        responses, _, _ = self.send('(Query () Env)')
         env = responses[1][2][1][0]
 
         # store the constants
@@ -265,7 +274,7 @@ class SerAPI:
 
     def query_goals(self):
         'Retrieve a list of open goals'
-        responses, _ = self.send('(Query () Goals)')
+        responses, _, _ = self.send('(Query () Goals)')
         assert responses[1][2][0] == Symbol('ObjList')
         if responses[1][2][1] == []:  #  no goals
             return [], [], [], []
@@ -296,7 +305,7 @@ class SerAPI:
 
 
     def has_open_goals(self):
-        responses, _ = self.send('(Query () Goals)')
+        responses, _, _ = self.send('(Query () Goals)')
         assert responses[1][2][0] == Symbol('ObjList')
         return responses[1][2][1] != []
 
@@ -306,7 +315,7 @@ class SerAPI:
             self.constr_cache = {}
         if sexp_str not in self.constr_cache:
             try:
-                responses, _ = self.send('(Print ((pp_format PpStr)) (CoqConstr %s))' % sexp_str)
+                responses, _, _ = self.send('(Print ((pp_format PpStr)) (CoqConstr %s))' % sexp_str)
                 self.constr_cache[sexp_str] = normalize_spaces(symbol2str(responses[1][2][1][0][1]))
             except CoqExn as ex:
                 if ex.err_msg == 'Not_found':
@@ -324,7 +333,7 @@ class SerAPI:
 
     def query_type(self, term_sexp, return_str=False):
         try:
-            responses, _ = self.send('(Query () (Type %s))' % term_sexp)
+            responses, _, _ = self.send('(Query () (Type %s))' % term_sexp)
         except CoqExn as ex:
             if ex.err_msg == 'Not_found':
                 return None
@@ -340,9 +349,9 @@ class SerAPI:
 
     def execute(self, cmd, return_ast=False):
         'Execute a vernac command'
-        state_id, ast = self.send_add(cmd, return_ast)
-        responses, _ = self.send('(Exec %d)' % state_id)
-        return responses, sexpdata.dumps(ast)
+        state_id, ast, msg_str1 = self.send_add(cmd, return_ast)
+        responses, _, msg_str2 = self.send('(Exec %d)' % state_id)
+        return responses, sexpdata.dumps(ast), msg_str2
 
 
     def push(self):

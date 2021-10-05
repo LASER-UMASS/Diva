@@ -13,8 +13,10 @@ from hashlib import md5
 from utils import log
 from progressbar import ProgressBar
 from agent import Agent
-from models.prover import Prover
+from models.bot_prover import Prover
+# from models.prover import Prover
 import pdb
+import time
 
 
 if __name__ == '__main__':
@@ -48,6 +50,14 @@ if __name__ == '__main__':
     parser.add_argument('--num_tactics', type=int, default=15025)
     parser.add_argument('--tac_vocab_file', type=str, default='token_vocab.pickle')
     parser.add_argument('--cutoff_len', type=int, default=30)
+    parser.add_argument('--learning_rate', type=float, default=3e-5)
+    parser.add_argument('--tac_embedding', type=int, default=256)
+    parser.add_argument('--tac_layers', type=int, default=1)
+    parser.add_argument('--num_gal', type=int, default=29467)
+    parser.add_argument('--gal_vocab_file', type=str, default='gal_vocab.pickle')
+    parser.add_argument('--gal_cutoff_len', type=int, default=30)
+    parser.add_argument('--gal_embedding', type=int, default=256)
+    parser.add_argument('--gal_layers', type=int, default=1)
     opts = parser.parse_args()
     log(opts)
     opts.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -63,6 +73,7 @@ if __name__ == '__main__':
     projs_test = ["weak-up-to", "buchberger", "jordan-curve-theorem", "dblib", "disel", "zchinese", "zfc", "dep-map", "chinese", "UnifySL", "hoare-tut", "huffman", "PolTac", "angles", "coq-procrastination", "coq-library-undecidability", "tree-automata", "coquelicot", "fermat4", "demos", "coqoban", "goedel", "verdi-raft", "verdi", "zorns-lemma", "coqrel", "fundamental-arithmetics"]
 
     if 'ours' in opts.method:
+        t1 = time.time()
         model = Prover(opts)
         log('loading model checkpoint from %s..' % opts.path)
         if opts.device.type == 'cpu':
@@ -71,6 +82,8 @@ if __name__ == '__main__':
             checkpoint = torch.load(opts.path)
         model.load_state_dict(checkpoint['state_dict'])
         model.to(opts.device)
+        t2 = time.time()
+        print("import model takes", (t2-t1) * 1e3, 'ms')
     else:
         model = None
 
@@ -97,7 +110,6 @@ if __name__ == '__main__':
     bar = ProgressBar(max_value=len(files))
     for i, f in enumerate(files):
         print('file: ', f)
-        #print('cuda memory allocated before file: ', torch.cuda.memory_allocated(opts.device), file=sys.stderr)
         results.extend(agent.evaluate(f, opts.proof))
         bar.update(i)
 

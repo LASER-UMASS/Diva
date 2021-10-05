@@ -1,4 +1,3 @@
-# Environment for interacting with Coq theorems during testing
 from serapi import SerAPI, CoqExn, CoqTimeout
 import re
 from copy import deepcopy
@@ -69,10 +68,14 @@ class ProofEnv:
                 if self.num_tactics_left <= 0:
                     self.serapi.pop()
                     return self.feedback('MAX_NUM_TACTICS_REACHED')
-                self.num_tactics_left -= 1
+                else:
+                    if command != "Show Proof.":
+                        self.num_tactics_left -= 1
                 command = 'timeout %d (%s).' % (time_left, command[:-1])
-            responses, _ = self.serapi.execute(command)
+            responses, _, msg = self.serapi.execute(command)
             states_cnt = self.serapi.pull()  # delete the saved state if no error
+            if command == "Show Proof.":
+                return self.feedback('TERM', pt=msg)
         except CoqExn as ex: 
             self.serapi.pop()  # restore the state
             return self.feedback('ERROR', error=ex)

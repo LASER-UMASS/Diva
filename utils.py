@@ -95,7 +95,7 @@ def add_ml_path(paths, serapi, sexp_cache):
     cmds = []
     for path in parsed_paths[::-1]:
         cmd = 'Add ML Path "%s".' % path
-        _, ast = serapi.execute(cmd, return_ast=True)
+        _, ast, _ = serapi.execute(cmd, return_ast=True)
         cmds.append((cmd, 'VernacAddMLPath', sexp_cache.dump(ast)))
     return cmds
 
@@ -140,7 +140,7 @@ def add_load_path(paths, serapi, pwd, sexp_cache):
             cmd = 'Add %sLoadPath "%s".' % (rec, physical_path)
         else:
             cmd = 'Add %sLoadPath "%s" as %s.' % (rec, physical_path, logical_path)
-        _, ast = serapi.execute(cmd, return_ast=True)
+        _, ast, _ = serapi.execute(cmd, return_ast=True)
         cmds.append((cmd, 'VernacAddLoadPath', sexp_cache.dump(ast)))
     return cmds
 
@@ -148,7 +148,7 @@ def add_load_path(paths, serapi, pwd, sexp_cache):
 def set_paths(meta, serapi, sexp_cache):
     pwd = PWD_PATTERN.search(meta)['pwd']
     cmd = 'Cd "%s".' % pwd
-    _, ast = serapi.execute(cmd, return_ast=True)
+    _, ast, _ = serapi.execute(cmd, return_ast=True)
     vernac_cmds = []
     vernac_cmds.append((cmd, 'VernacChdir', sexp_cache.dump(ast)))
     ml_paths = ML_PATHS_PATTERN.search(meta)['ml_paths']
