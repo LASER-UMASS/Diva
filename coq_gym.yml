@@ -13,3 +13,4 @@ dependencies:
     - pexpect==4.6.0
     - progressbar2==3.39.3
     - sexpdata==0.0.3
+    - torch
