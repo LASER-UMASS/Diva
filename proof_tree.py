@@ -41,4 +41,3 @@ class ProofTree:
 
     def to_dict(self):
         return self.root.to_dict()
-            

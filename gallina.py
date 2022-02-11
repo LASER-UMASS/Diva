@@ -1,4 +1,3 @@
-# Utilities for reconstructing Gallina terms from their serialized S-expressions in CoqGym
 from io import StringIO
 from vernac_types import Constr__constr
 from lark import Lark, Transformer, Visitor, Discard
@@ -101,4 +100,3 @@ class TreeNumTokens(Transformer):
 
     def __default__(self, symbol, children, meta):
         return sum([1 if isinstance(c, Token) else c for c in children])
-

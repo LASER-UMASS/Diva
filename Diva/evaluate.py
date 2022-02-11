@@ -13,8 +13,7 @@ from hashlib import md5
 from utils import log
 from progressbar import ProgressBar
 from agent import Agent
-from models.bot_prover import Prover
-# from models.prover import Prover
+from models.prover import Prover
 import pdb
 import time
 

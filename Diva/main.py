@@ -5,8 +5,7 @@ from options import parse_args
 from dataloader import create_dataloader
 from utils import log
 from agent import Agent
-# from models.prover import Prover
-from models.bot_prover import Prover
+from models.prover import Prover
 import sys
 import pdb
 
