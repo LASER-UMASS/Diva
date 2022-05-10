@@ -1,8 +1,10 @@
 # Diva
 
-In-progress work for the Diva (**D**iversity **i**n **v**erific**a**tion) Coq proof script synthesis tool.
+Diva (**D**iversity **i**n **v**erific**a**tion) Coq proof script synthesis tool.
 
-The Diva technique and its evaluation are described in Diversity-Driven Automated Verification by Emily First and Yuriy Brun. Published in the ACM/IEEE International Conference on Software Engineering (ICSE) 2022.  https://doi.org/10.1145/3510003.3510138
+The Diva technique and its evaluation are described in "Diversity-Driven Automated Verification" by Emily First and Yuriy Brun. Published in the ACM/IEEE International Conference on Software Engineering (ICSE) 2022.  https://doi.org/10.1145/3510003.3510138 ([pdf](https://people.cs.umass.edu/~brun/pubs/pubs/First22icse.pdf))
+
+Watch a [video about Diva](https://www.youtube.com/embed/3XQ-iupBAgs). 
 
 We have made available a replication package for the results in the paper. It is a VirtualBox VM: [here](https://doi.org/10.5281/zenodo.5903318).
 
